@@ -15,6 +15,8 @@ import seaborn as sns
 
 import matplotlib.pyplot as plt
 
+import exploring_features
+
 
 def plot_history(history):
     hist = pd.DataFrame(history.history)
@@ -70,10 +72,17 @@ if __name__ == "__main__":
 
     n_filtered_training_set = len(filtered_training_set)
 
-    features_to_use = ["assists", "goals_scored", "total_points", "goals_scored_per_minute", "total_points_per_minute",
-                       "total_points_3_game_form","total_points_per_played_game","goals_scored_per_played_game",
-                       "assists_per_played_game","goals_scored_per_minute","assists_per_minute","clean_sheets_per_played_game",
-                       "value"]
+    # features_to_use = ["assists", "goals_scored", "goals_scored_per_minute", "total_points_per_minute",
+    #                    "total_points_3_game_form","total_points_per_played_game","goals_scored_per_played_game",
+    #                    "assists_per_played_game","goals_scored_per_minute","assists_per_minute","clean_sheets_per_played_game",
+    #                    "value"]
+
+    features_to_use = ["value", "threat_per_minute", "ict_index_per_minute",
+                        "total_points_per_minute","goals_scored_per_minute",
+                        "selected","big_chances_missed_per_minute","creativity_per_minute"
+                        ,"offside_per_minute","winning_goals_per_minute","assists_per_minute",
+                       "clearances_blocks_interceptions_per_minute" , "goals_conceded_per_played_game",
+                       "recoveries_per_minute", "yellow_cards_per_played_game"]
 
     min_max_scaler = preprocessing.MinMaxScaler()
 
@@ -106,9 +115,10 @@ if __name__ == "__main__":
     print(train_scaled_features.shape)
 
     Model = Sequential()
-    Model.add(Dense(512, activation='relu', input_shape=[train_scaled_features.shape[1]]))
-    Model.add(Dense(128, activation='relu'))
-    Model.add(Dense(1))
+    Model.add(Dense(10, activation='relu', input_shape=[train_scaled_features.shape[1]]))
+    Model.add(Dense(30, activation='relu'))
+    Model.add(Dense(40, activation='relu'))
+    Model.add(Dense(1, activation='linear'))
 
     optimizer = RMSprop(0.001)
 
@@ -142,7 +152,7 @@ if __name__ == "__main__":
     ax.set_xlim(0.0, 25.0)
     ax.set_ylim(0.0, 25.0)
     ax.plot([0.0,25.0],[0.0,25.0])
-    fig.savefig("PredVTrue_v1.pdf")
+    fig.savefig("PredVTrue_vw.pdf")
 
     errors = test_predictions - test_targets
     print(errors)
@@ -155,9 +165,11 @@ if __name__ == "__main__":
     error_fig.savefig("PredictionErrors.pdf")
 
     print(" Done error plot")
-    #loss, mae, mse = Model.evaluate(test_scaled_features, test_targets, verbose=0)
 
-    #print("Testing set Mean Abs Error: {:5.2f} Points".format(mae))
+    loss, mae, mse = Model.evaluate(test_scaled_features, test_targets, verbose=0)
+
+    print("Testing set Mean Abs Error: {:5.2f} Points".format(mae))
+    print("Testing set Mean Square Error: {:5.2f} Points".format(mse))
 
 
     predictions_fig = plt.figure("predictions")
